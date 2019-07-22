@@ -1,15 +1,25 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
+/**
+ * 用户模型
+ *
+ * Authenticatable 授权相关功能的引用
+ */
 class User extends Authenticatable
 {
+    //消息通知相关功能
     use Notifiable;
 
+    //定义模型对应的数据表默认为模型名复数形式(User模型对应users表)
+    protected $table = 'users';
+
     /**
+     * 只有包含在该属性中的字段才能够被正常更新
      * The attributes that are mass assignable.
      *
      * @var array
@@ -19,6 +29,8 @@ class User extends Authenticatable
     ];
 
     /**
+     * 隐藏显示字段
+     * 当我们需要对用户密码或其它敏感信息在用户实例通过数组或json显示时进行隐藏
      * The attributes that should be hidden for arrays.
      *
      * @var array
