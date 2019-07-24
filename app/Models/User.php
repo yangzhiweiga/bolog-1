@@ -16,7 +16,7 @@ class User extends Authenticatable
     use Notifiable;
 
     //定义模型对应的数据表默认为模型名复数形式(User模型对应users表)
-    protected $table = 'users';
+//    protected $table = 'users';
 
     /**
      * 只有包含在该属性中的字段才能够被正常更新
@@ -38,4 +38,16 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * 获取用户gravatar头像
+     */
+    public function gravatar($size = '100')
+    {
+        //根据用户在gravatar注册的邮箱生成MD5
+        $hash = md5(strtolower(trim($this->attributes['email'])));
+        //拼接gravatar服务器URL
+        $url = sprintf('http://www.gravatar.com/avatar/%s?s=%s', $hash, $size);
+        return $url;
+    }
 }

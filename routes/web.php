@@ -20,3 +20,6 @@ Route::get('/help','StaticPagesController@help')->name('help');
 Route::get('/about','StaticPagesCOntroller@about')->name('about');
 
 Route::get('/signup','UsersController@create')->name('signup');
+
+//用户管理
+Route::resource('users','UsersController');
