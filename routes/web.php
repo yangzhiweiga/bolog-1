@@ -23,3 +23,8 @@ Route::get('/signup','UsersController@create')->name('signup');
 
 //用户管理
 Route::resource('users','UsersController');
+
+//session管理
+Route::get('login','SessionsController@create')->name('login');
+Route::post('login','SessionsController@store')->name('login');
+Route::delete('logout','SessionsController@destory')->name('logout');
