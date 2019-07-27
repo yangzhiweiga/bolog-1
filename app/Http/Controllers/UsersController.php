@@ -6,10 +6,27 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Mockery\Exception;
 
 class UsersController extends Controller
 {
-    //
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store']
+        ]);
+        $this->middleware('guest', [
+            'only' => ['create']
+        ]);
+    }
+
+    public function index()
+    {
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
+    }
+
+    //用户登陆
     public function create()
     {
         return view('users.create');
@@ -56,5 +73,62 @@ class UsersController extends Controller
         Auth::login($user);
         session()->flash('success', '注册成功,欢迎开启心情之旅');
         return redirect()->route('users.show', [$user]);
+    }
+
+    public function edit(User $user)
+    {
+        try {
+            //授权认证
+            $this->authorize('update', $user);
+        } catch (\Exception $e) {
+            return abort(403, '你没有权限访问这个页面');
+        }
+
+        return view('users.edit', compact('user'));
+    }
+
+    /**
+     * @param User $user
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
+    public function update(User $user, Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required|max:55',
+            'password' => 'nullable|confirmed|min:6'
+        ]);
+
+        try {
+            //授权认证
+            $this->authorize('update', $user);
+        } catch (\Exception $e) {
+            return abort(403, '你没有权限访问这个页面');
+        }
+
+        $data = [];
+        $data['name'] = $request->name;
+        if ($request->password) {
+            $data['password'] = $request->password;
+        }
+
+        $user->update($data);
+
+        session()->flash('success', '更新资料成功');
+        return redirect()->route('users.show', $user->id);
+    }
+
+    public function destroy(User $user)
+    {
+        try {
+            $this->authorize('destroy', $user);
+        } catch (\Exception $e) {
+            return abort(403, '你没有权限执行删除操作');
+        }
+
+        $user->delete();
+        session()->flash('success', '删除成功');
+        return back();
     }
 }

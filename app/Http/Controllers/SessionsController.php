@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class SessionsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('guest',[
+            'only'=>['create']
+        ]);
+    }
+
     //
     public function create()
     {
@@ -23,14 +30,15 @@ class SessionsController extends Controller
         //登陆身份认证
         if(Auth::attempt($req,$request->has('remember'))){
             session()->flash('success','欢迎回来');
-            return redirect()->route('users.show',[Auth::user()]);
+            //intended自动获取退出登陆哪一个页面地址如果存在跳转到上一次页面,不存在指定跳转到个人中心页面
+            return redirect()->intended(route('users.show',[Auth::user()]));
         }else{
             session()->flash('danger','邮箱或密码不正确');
             return redirect()->back();
         }
     }
 
-    public function destroy()
+    public function destory()
     {
         Auth::logout();
         session()->flash('success','你已经成功退出');
