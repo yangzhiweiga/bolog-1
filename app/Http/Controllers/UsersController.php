@@ -33,9 +33,18 @@ class UsersController extends Controller
         return view('users.create');
     }
 
+    /**
+     * 显示指定用户发布所有微博列表
+     *
+     * @param User $user
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function show(User $user)
     {
-        return view('users.show', compact('user'));
+        $statuses = $user->statuses()
+            ->orderBy('created_at','desc')
+            ->paginate(30);
+        return view('users.show', compact('user','statuses'));
     }
 
     /**
