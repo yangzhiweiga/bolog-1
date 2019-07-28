@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPassword;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -49,5 +50,21 @@ class User extends Authenticatable
         //拼接gravatar服务器URL
         $url = sprintf('http://www.gravatar.com/avatar/%s?s=%s', $hash, $size);
         return $url;
+    }
+
+    /**
+     * 事件 注册前设置activation_token
+     */
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function($user){
+            $user->activation_token = str_random(30);
+        });
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPassword($token));
     }
 }

@@ -11,11 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/home','StaticPagesController@home')->name('home');
+Route::get('/','StaticPagesController@home')->name('home');
 Route::get('/help','StaticPagesController@help')->name('help');
 Route::get('/about','StaticPagesCOntroller@about')->name('about');
 
@@ -28,3 +24,12 @@ Route::resource('users','UsersController');
 Route::get('login','SessionsController@create')->name('login');
 Route::post('login','SessionsController@store')->name('login');
 Route::delete('logout','SessionsController@destory')->name('logout');
+
+//账户激活
+Route::get('signup/confirm/{token}','UsersController@confirmEmail')->name('confirm_email');
+
+//密码重设
+Route::get('password/reset','Auth\ForgotPasswordController@showLinkRequestForm')->name('password.request');
+Route::post('password/email','Auth\ForgotPasswordController@sendResetLinkEmail')->name('password.email');
+Route::get('password/reset/{token}','Auth\ResetPasswordController@showResetForm')->name('password.reset');
+Route::post('password/reset','Auth\ResetPasswordController@reset')->name('password.update');

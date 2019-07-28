@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Mockery\Exception;
 
@@ -13,7 +14,7 @@ class UsersController extends Controller
     public function __construct()
     {
         $this->middleware('auth', [
-            'except' => ['show', 'create', 'store']
+            'except' => ['show', 'create', 'store','index','confirmEmail']
         ]);
         $this->middleware('guest', [
             'only' => ['create']
@@ -70,9 +71,10 @@ class UsersController extends Controller
             'password' => bcrypt($request->password)
         ]);
 
-        Auth::login($user);
-        session()->flash('success', '注册成功,欢迎开启心情之旅');
-        return redirect()->route('users.show', [$user]);
+//        Auth::login($user);
+        $this->sendEmailConfirmationTo($user);
+        session()->flash('success', '邮件已发送到你邮箱,请及时激活账户');
+        return redirect('/');
     }
 
     public function edit(User $user)
@@ -130,5 +132,40 @@ class UsersController extends Controller
         $user->delete();
         session()->flash('success', '删除成功');
         return back();
+    }
+
+    /**
+     * 发送邮件
+     *
+     * @param $user
+     */
+    public function sendEmailConfirmationTo($user)
+    {
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $to = $user->email;
+        $subject = '感谢注册sample,请完成账户激活';
+
+        Mail::send($view, $data, function ($message) use ($to,$subject) {
+            $message->to($to)->subject($subject);
+        });
+    }
+
+    /**
+     * 账户激活
+     *
+     * @param $token
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function confirmEmail($token)
+    {
+        $user = User::where('activation_token',$token)->firstOrFail();
+        $user->activated = true;
+        $user->activation_token = null;
+        $user->save();
+
+        Auth::login($user);
+        session()->flash('success','恭喜你,完成注册。');
+        return redirect()->route('users.show',[$user]);
     }
 }
