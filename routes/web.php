@@ -36,3 +36,13 @@ Route::post('password/reset','Auth\ResetPasswordController@reset')->name('passwo
 
 //之生成store以及destroy两个动作
 Route::resource('statuses','StatusesController',['only'=>['store','destroy']]);
+
+//关注列表
+Route::get('/users/{user}/followings','UsersController@followings')->name('users.followings');
+//粉丝列表
+Route::get('/users/{user}/followers','UsersController@followers')->name('users.followers');
+
+//关注
+Route::post('/users/followers/{user}','FollowersController@store')->name('followers.store');
+//取消关注
+Route::delete('/users/followers/{user}','FollowersController@destroy')->name('followers.destroy');
